@@ -246,7 +246,6 @@
         var v = document.createElement("video");
         v.controls = true; v.setAttribute("playsinline", ""); v.preload = "metadata";
         v.poster = dir + prefix + i + posterExt;
-        v.src = dir + prefix + i + ext + "#t=0.1";          // #t shows the first frame when there is no poster
         v.setAttribute("aria-label", "Special video " + i + " of " + count);
         v.addEventListener("play", (function (me) { return function () {   // only one video plays at a time
           vids.forEach(function (o) { if (o !== me) o.pause(); });
