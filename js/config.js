@@ -45,6 +45,18 @@ window.STORY_CONFIG = {
     10: "audio02.mp3"   // continues from Chapter 9
   },
 
+  // ---- "Special One" (navbar button + video pop-up) ----
+  // Put video1.mp4 ... video5.mp4 in assets/video/ (video1.jpg ... are optional posters).
+  // The 🎁 Special One button only appears when ALL of the files below exist.
+  // Fewer files than `count`  → the button and the pop-up stay hidden.
+  surprise: {
+    dir: "assets/video/",
+    prefix: "video",     // video1.mp4, video2.mp4, ...
+    ext: ".mp4",
+    posterExt: ".jpg",   // optional poster image per video (video1.jpg, ...)
+    count: 5             // how many videos are required before it is shown
+  },
+
   // For YOUR testing only: open  index.html?preview=<key>  to open the curtain
   // and unlock everything in that tab. Change or clear before sharing.
   previewKey: "pri-preview-2311"
