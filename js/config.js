@@ -15,14 +15,14 @@ window.STORY_CONFIG = {
   chapterSchedule: [
     { id: 'chapter-1',  hour: 2,  minute: 30 },
     { id: 'chapter-2',  hour: 5,  minute: 0  },
-    { id: 'chapter-3',  hour: 7,  minute: 30 },
-    { id: 'chapter-4',  hour: 9,  minute: 0  },
-    { id: 'chapter-5',  hour: 11, minute: 30 },
-    { id: 'chapter-6',  hour: 14, minute: 0  },
-    { id: 'chapter-7',  hour: 16, minute: 0  },
-    { id: 'chapter-8',  hour: 18, minute: 30 },
-    { id: 'chapter-9',  hour: 20, minute: 30 },
-    { id: 'chapter-10', hour: 21, minute: 0  }
+    { id: 'chapter-3',  hour: 7,  minute: 0 },
+    { id: 'chapter-4',  hour: 9,  minute: 30  },
+    { id: 'chapter-5',  hour: 12, minute: 00 },
+    { id: 'chapter-6',  hour: 14, minute: 30  },
+    { id: 'chapter-7',  hour: 17, minute: 0  },
+    { id: 'chapter-8',  hour: 19, minute: 0 },
+    { id: 'chapter-9',  hour: 21, minute: 30 },
+    { id: 'chapter-10', hour: 21, minute: 30  }
   ],
 
   // ---- AUDIO (all files live in assets/audio/) ----
