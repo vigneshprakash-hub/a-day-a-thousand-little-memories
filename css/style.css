@@ -152,13 +152,38 @@ h1,h2,h3{font-family:var(--serif);line-height:1.2;font-weight:700}
 
 /* buttons / nav */
 .cta-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:26px 0 8px}
-.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--ui);font-weight:800;letter-spacing:.06em;font-size:.84rem;
-  text-decoration:none;padding:14px 26px;border-radius:99px;background:var(--rose);color:#fff;border:0;cursor:pointer;
-  box-shadow:0 8px 20px rgba(184,51,106,.3);transition:transform .2s}
-.btn:hover{transform:translateY(-2px)}
-.btn.ghost{background:transparent;color:var(--rose);box-shadow:none;border:2px solid var(--rose)}
-.btn.is-locked{background:#cdbba5;box-shadow:none;cursor:not-allowed;pointer-events:none}
-.slide.dark .btn.ghost{color:var(--gold);border-color:var(--gold)}
+/* scrapbook paper-tag buttons: stitched paper label + a strip of washi tape */
+.btn{--paper:#fffdf7;--ink-b:var(--rose);--stitch:rgba(184,51,106,.5);--tape:rgba(217,164,65,.62);
+  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;
+  font-family:var(--serif);font-style:italic;font-weight:500;font-size:1.02rem;letter-spacing:.01em;line-height:1.25;
+  text-decoration:none;text-align:center;padding:15px 32px;cursor:pointer;
+  color:var(--ink-b);background:var(--paper);border:1px solid #ead8bd;border-radius:7px 13px 8px 12px;
+  box-shadow:0 2px 0 #ecd9c0,0 12px 22px rgba(120,70,30,.17);transform:rotate(-1.2deg);
+  transition:transform .25s cubic-bezier(.3,1.4,.5,1),box-shadow .25s}
+.btn::before{content:"";position:absolute;inset:5px;border:1.5px dashed var(--stitch);border-radius:5px 10px 6px 9px;pointer-events:none}
+.btn::after{content:"";position:absolute;top:-11px;left:50%;width:64px;height:19px;pointer-events:none;
+  transform:translateX(-50%) rotate(-3deg);background:var(--tape);
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 3px,transparent 3px 7px);
+  clip-path:polygon(0 0,100% 0,97% 25%,100% 50%,97% 75%,100% 100%,0 100%,3% 75%,0 50%,3% 25%)}
+.btn:hover{transform:rotate(0) translateY(-3px);box-shadow:0 2px 0 #ecd9c0,0 16px 26px rgba(120,70,30,.22)}
+.btn:active{transform:rotate(0) translateY(0);box-shadow:0 1px 0 #ecd9c0,0 6px 12px rgba(120,70,30,.18)}
+.btn:focus-visible{outline:3px solid var(--teal);outline-offset:5px}
+/* primary = rose card, gold tape */
+.btn:not(.ghost){--paper:var(--rose);--ink-b:#fff8ee;--stitch:rgba(255,244,226,.65);border-color:#9c2557;
+  background-image:linear-gradient(135deg,rgba(255,255,255,.1),transparent 55%);
+  box-shadow:0 2px 0 #8f2150,0 12px 22px rgba(184,51,106,.3)}
+.btn:not(.ghost):hover{box-shadow:0 2px 0 #8f2150,0 16px 26px rgba(184,51,106,.38)}
+/* secondary = cream paper, teal stitching, rose tape */
+.btn.ghost{--ink-b:var(--teal);--stitch:rgba(46,139,122,.55);--tape:rgba(184,51,106,.42);transform:rotate(1deg)}
+.btn.ghost:hover{transform:rotate(0) translateY(-3px)}
+/* locked = plain faded kraft paper, no tape */
+.btn.is-locked{--paper:#eadcc6;--ink-b:#8c7a68;--stitch:rgba(140,122,104,.45);border-color:#d9c6aa;
+  background-image:none;box-shadow:none;cursor:not-allowed;pointer-events:none;transform:rotate(-.6deg)}
+.btn.is-locked::after{display:none}
+/* dark chapter slides */
+.slide.dark .btn.ghost{--paper:var(--dark2);--ink-b:var(--gold);--stitch:rgba(217,164,65,.55);--tape:rgba(46,139,122,.6);
+  border-color:#4a3f3f;box-shadow:0 2px 0 #000,0 12px 22px rgba(0,0,0,.4)}
+.cta-row{gap:18px 22px}
 .pager{padding:30px 0 70px;text-align:center}
 footer{padding:22px 0 40px;text-align:center;font-family:var(--ui);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 
@@ -280,3 +305,55 @@ body.curtain-closed{overflow:hidden}
   font-size:.78rem;letter-spacing:.06em;color:#dfe6ff;background:rgba(223,230,255,.12);border:1px solid rgba(223,230,255,.35);
   padding:8px 16px;border-radius:99px;pointer-events:none;animation:hintpulse 1.8s ease-in-out infinite}
 .curtain.opening .curtain-hint{opacity:0}
+
+/* ---------- Birthday Surprise button + modal ---------- */
+.topbar .wrap{flex-wrap:nowrap}
+.topbar a.home{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.surprise-btn{position:relative;flex:0 0 auto;font-family:var(--serif);font-style:italic;font-weight:500;font-size:.92rem;line-height:1.2;
+  cursor:pointer;padding:9px 20px 9px 18px;color:#fff8ee;white-space:nowrap;
+  background:var(--rose);background-image:linear-gradient(135deg,rgba(255,255,255,.14),transparent 55%);
+  border:1px solid #9c2557;border-radius:7px 12px 8px 11px;transform:rotate(-1.6deg);
+  box-shadow:0 2px 0 #8f2150,0 8px 16px rgba(184,51,106,.3);
+  transition:transform .25s cubic-bezier(.3,1.4,.5,1),box-shadow .25s}
+.surprise-btn::before{content:"";position:absolute;inset:3px;border:1.3px dashed rgba(255,244,226,.65);border-radius:5px 9px 6px 8px;pointer-events:none}
+.surprise-btn::after{content:"";position:absolute;top:-5px;right:10px;width:34px;height:13px;pointer-events:none;
+  transform:rotate(5deg);background:rgba(217,164,65,.8);
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 3px,transparent 3px 6px);
+  clip-path:polygon(0 0,100% 0,96% 33%,100% 66%,96% 100%,0 100%,4% 66%,0 33%)}
+.surprise-btn:hover{transform:rotate(0) translateY(-2px);box-shadow:0 2px 0 #8f2150,0 12px 20px rgba(184,51,106,.38)}
+.surprise-btn:focus-visible{outline:3px solid var(--teal);outline-offset:4px}
+.surprise-btn[hidden]{display:none}
+.modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(29,26,26,.82);backdrop-filter:blur(4px);
+  overflow-y:auto;padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom))}
+.modal.show{display:flex;animation:fadein .3s ease}
+.modal-content{background:var(--paper);border:1px solid var(--line);margin:auto;padding:clamp(18px,3vw,32px);width:100%;max-width:1120px;
+  border-radius:28px;position:relative;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.4);animation:risein .4s ease}
+.modal-content h2{font-size:clamp(1.4rem,3.6vw,2rem);color:var(--ink);padding:0 38px}
+.modal-content h2::after{content:"";display:block;width:56px;height:3px;border-radius:3px;margin:.6rem auto 0;background:linear-gradient(90deg,var(--rose),var(--gold))}
+.close-btn{position:absolute;top:12px;right:14px;width:42px;height:42px;border-radius:50%;border:1.5px dashed rgba(184,51,106,.55);background:#fffdf7;
+  color:var(--rose);font-size:1.7rem;line-height:1;cursor:pointer;display:grid;place-items:center;padding-bottom:3px;
+  box-shadow:0 4px 10px rgba(120,70,30,.15);transition:transform .25s,background .2s,color .2s}
+.close-btn:hover{background:var(--rose);color:#fff;transform:rotate(90deg)}
+.close-btn:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+/* videos as taped polaroids — 5 across on desktop, wrapping on tablets, swipeable row on phones */
+.video-container{display:flex;justify-content:center;align-items:flex-start;gap:clamp(14px,2vw,22px);flex-wrap:wrap;margin-top:26px;padding-top:8px}
+.video-container video{flex:0 1 calc((100% - 4*clamp(14px,2vw,22px))/5);min-width:150px;width:100%;aspect-ratio:9/16;object-fit:contain;background:#000;
+  border-radius:6px;border:7px solid #fff;border-bottom-width:16px;box-shadow:var(--shadow);transition:transform .25s}
+.video-container video:nth-child(odd){transform:rotate(-1.4deg)}
+.video-container video:nth-child(even){transform:rotate(1.2deg)}
+.video-container video:hover{transform:rotate(0) translateY(-3px)}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes risein{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+@media (max-width:960px){.video-container video{flex-basis:calc((100% - 2*18px)/3)}}   /* 3 + 2 on tablets */
+@media (max-width:640px){   /* phones: one swipeable row */
+  .video-container{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    padding:10px 6px 16px;margin-inline:-6px}
+  .video-container video{flex:0 0 68%;min-width:0;scroll-snap-align:center}
+}
+@media (max-width:480px){
+  .topbar .where{display:none}
+  .surprise-btn{padding:8px 15px 8px 13px;font-size:.84rem}
+  .topbar a.home{font-size:.72rem}
+  .btn{padding:14px 24px;font-size:.98rem}
+}
+@media (prefers-reduced-motion:reduce){.btn,.surprise-btn,.video-container video{transition:none}}
