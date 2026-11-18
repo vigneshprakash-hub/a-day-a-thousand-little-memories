@@ -206,14 +206,54 @@
   }
 
   /* ============================================================
-     BIRTHDAY SURPRISE MODAL (navbar button → two videos)
+     SPECIAL ONE  (navbar button → video pop-up)
+     Shown ONLY when every video (video1.mp4 … videoN.mp4, N = config.surprise.count)
+     exists in assets/video/. Otherwise the button stays hidden.
      ============================================================ */
   function initSurprise() {
     var modal = document.getElementById("surprise-modal");
     var openBtn = document.getElementById("surprise-btn");
-    if (!modal || !openBtn) return;
-    var vids = [].slice.call(modal.querySelectorAll("video"));
+    var box = document.getElementById("surprise-videos");
+    if (!modal || !openBtn || !box) return;
+    var cfg = (window.STORY_CONFIG && window.STORY_CONFIG.surprise) || {};
+    var dir = cfg.dir || "assets/video/", prefix = cfg.prefix || "video", ext = cfg.ext || ".mp4";
+    var posterExt = cfg.posterExt || ".jpg", count = cfg.count || 5;
     var closeBtn = modal.querySelector(".close-btn");
+    var vids = [];
+
+    /* does this file exist?  (HEAD request on a server; metadata probe when opened from disk) */
+    function exists(src) {
+      if (/^https?:/i.test(location.protocol) && window.fetch) {
+        return fetch(src, { method: "HEAD", cache: "no-cache" }).then(function (r) {
+          var type = (r.headers.get("content-type") || "").toLowerCase();
+          return r.ok && type.indexOf("text/html") === -1;
+        }).catch(function () { return false; });
+      }
+      return new Promise(function (resolve) {
+        var v = document.createElement("video"), done = false;
+        function fin(ok) { if (done) return; done = true; v.removeAttribute("src"); v.load(); resolve(ok); }
+        v.preload = "metadata"; v.muted = true;
+        v.onloadedmetadata = function () { fin(true); };
+        v.onerror = function () { fin(false); };
+        setTimeout(function () { fin(false); }, 15000);
+        v.src = src;
+      });
+    }
+
+    function build() {
+      box.textContent = "";
+      for (var i = 1; i <= count; i++) {
+        var v = document.createElement("video");
+        v.controls = true; v.setAttribute("playsinline", ""); v.preload = "metadata";
+        v.poster = dir + prefix + i + posterExt;
+        v.src = dir + prefix + i + ext + "#t=0.1";          // #t shows the first frame when there is no poster
+        v.setAttribute("aria-label", "Special video " + i + " of " + count);
+        v.addEventListener("play", (function (me) { return function () {   // only one video plays at a time
+          vids.forEach(function (o) { if (o !== me) o.pause(); });
+        }; })(v));
+        vids.push(v); box.appendChild(v);
+      }
+    }
 
     function openModal() {
       modal.classList.add("show");
@@ -229,13 +269,16 @@
       openBtn.focus();
     }
     window.openModal = openModal; window.closeModal = closeModal;
-
     openBtn.addEventListener("click", openModal);
     closeBtn.addEventListener("click", closeModal);
     modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });   // click outside the content
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && modal.classList.contains("show")) closeModal(); });
-    vids.forEach(function (v) {                                          // only one video plays at a time
-      v.addEventListener("play", function () { vids.forEach(function (o) { if (o !== v) o.pause(); }); });
+
+    var checks = [];
+    for (var i = 1; i <= count; i++) checks.push(exists(dir + prefix + i + ext));
+    Promise.all(checks).then(function (found) {
+      if (found.every(Boolean)) { build(); openBtn.hidden = false; }   // all present → show
+      /* otherwise: the button stays hidden */
     });
   }
 
