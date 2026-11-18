@@ -22,7 +22,7 @@ window.STORY_CONFIG = {
     { id: 'chapter-7',  hour: 17, minute: 0  },
     { id: 'chapter-8',  hour: 19, minute: 0 },
     { id: 'chapter-9',  hour: 21, minute: 30 },
-    { id: 'chapter-10', hour: 21, minute: 30  }
+    { id: 'chapter-10', hour: 22, minute: 0  }
   ],
 
   // ---- AUDIO (all files live in assets/audio/) ----
