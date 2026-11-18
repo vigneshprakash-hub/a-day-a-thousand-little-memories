@@ -205,6 +205,40 @@
     }
   }
 
+  /* ============================================================
+     BIRTHDAY SURPRISE MODAL (navbar button → two videos)
+     ============================================================ */
+  function initSurprise() {
+    var modal = document.getElementById("surprise-modal");
+    var openBtn = document.getElementById("surprise-btn");
+    if (!modal || !openBtn) return;
+    var vids = [].slice.call(modal.querySelectorAll("video"));
+    var closeBtn = modal.querySelector(".close-btn");
+
+    function openModal() {
+      modal.classList.add("show");
+      document.body.classList.add("noscroll");
+      if (window.Story && window.Story.bgm) window.Story.bgm.suspend();   // pause chapter music while the videos are open
+      closeBtn.focus();
+    }
+    function closeModal() {
+      vids.forEach(function (v) { v.pause(); });
+      modal.classList.remove("show");
+      document.body.classList.remove("noscroll");
+      if (window.Story && window.Story.bgm) window.Story.bgm.resume();
+      openBtn.focus();
+    }
+    window.openModal = openModal; window.closeModal = closeModal;
+
+    openBtn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });   // click outside the content
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && modal.classList.contains("show")) closeModal(); });
+    vids.forEach(function (v) {                                          // only one video plays at a time
+      v.addEventListener("play", function () { vids.forEach(function (o) { if (o !== v) o.pause(); }); });
+    });
+  }
+
   /* ---------- boot ---------- */
   var chapter = parseInt(document.body.getAttribute("data-chapter") || "0", 10);
 
@@ -215,6 +249,7 @@
     }
     document.documentElement.classList.remove("gate");
     if (chapter) initChapter(chapter); else { initCurtain(); initDashboard(); }
+    initSurprise();
     updateStoryState();
     setInterval(updateStoryState, 1000);                 // continuous (1s keeps countdowns live)
   }
@@ -424,6 +459,7 @@
     }
 
     var bgm = initChapterAudio(n);
+    window.Story.bgm = bgm;   // lets the Birthday Surprise modal pause chapter music
 
     var modal = document.getElementById("vmodal");
     if (modal) {
