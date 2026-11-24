@@ -20,7 +20,7 @@
   }
   function unlockTimestamp(i) { var c = chapterSchedule[i]; return targetTime(c.hour, c.minute); }
   function curtainTimestamp() { return targetTime(0, 0); }   // opens: 12:00 AM on the target date
-  function closingTimestamp() { return targetTime(23, 59); } // closes: 11:59 PM on the target date
+  //function closingTimestamp() { return targetTime(23, 59); } // closes: 11:59 PM on the target date
 
   var PREVIEW = false;
   try {
@@ -82,7 +82,7 @@
   var OPENED_KEY = "story-curtain-opened";
   var curtainEl = null, readyBtn = null, curtainAudio = null, curtainState = "closed"; // closed | opening | open
 
-  function curtainActive(now) { return PREVIEW || (now >= curtainTimestamp() && now < closingTimestamp()); }
+  function curtainActive(now) { return PREVIEW || (now >= curtainTimestamp()); } //&& now < closingTimestamp()); }
 
   function initCurtain() {
     curtainEl = document.getElementById("curtain");
