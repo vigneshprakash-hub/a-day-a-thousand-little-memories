@@ -2,6 +2,12 @@
    CONFIG — automated schedule for Nov 23, 2026
    ============================================================ */
 window.STORY_CONFIG = {
+  // MASTER SWITCH — true  = no time rules at all: the curtain always shows "Ready!" and
+  //                         every chapter is open (use when she opens it after the day).
+  //                 false = the timed schedule below (curtain from 12:00 AM to 11:59 PM,
+  //                         chapters unlock one by one).
+  unlockAll: true,
+
   // Schedule specifically for Nov 23, 2026
   TARGET_YEAR: 2026,
   TARGET_MONTH: 10,   // November (0-indexed)
@@ -15,14 +21,14 @@ window.STORY_CONFIG = {
   chapterSchedule: [
     { id: 'chapter-1',  hour: 2,  minute: 30 },
     { id: 'chapter-2',  hour: 5,  minute: 0  },
-    { id: 'chapter-3',  hour: 7,  minute: 0 },
-    { id: 'chapter-4',  hour: 9,  minute: 30  },
-    { id: 'chapter-5',  hour: 12, minute: 00 },
-    { id: 'chapter-6',  hour: 14, minute: 30  },
-    { id: 'chapter-7',  hour: 17, minute: 0  },
-    { id: 'chapter-8',  hour: 19, minute: 0 },
-    { id: 'chapter-9',  hour: 21, minute: 30 },
-    { id: 'chapter-10', hour: 22, minute: 0  }
+    { id: 'chapter-3',  hour: 7,  minute: 30 },
+    { id: 'chapter-4',  hour: 9,  minute: 0  },
+    { id: 'chapter-5',  hour: 11, minute: 30 },
+    { id: 'chapter-6',  hour: 14, minute: 0  },
+    { id: 'chapter-7',  hour: 16, minute: 0  },
+    { id: 'chapter-8',  hour: 18, minute: 30 },
+    { id: 'chapter-9',  hour: 20, minute: 30 },
+    { id: 'chapter-10', hour: 21, minute: 0  }
   ],
 
   // ---- AUDIO (all files live in assets/audio/) ----
@@ -45,16 +51,13 @@ window.STORY_CONFIG = {
     10: "audio02.mp3"   // continues from Chapter 9
   },
 
-  // ---- "Special One" (navbar button + video pop-up) ----
-  // Put video1.mp4 ... video5.mp4 in assets/video/ (video1.jpg ... are optional posters).
-  // The 🎁 Special One button only appears when ALL of the files below exist.
-  // Fewer files than `count`  → the button and the pop-up stay hidden.
+  // ---- "Special One" videos (navbar button + pop-up) ----
+  // Put these files in assets/video/. The button only appears when at least `minVideos`
+  // of them exist (5 = needs all five; set 4 to allow four). Missing ones are skipped.
   surprise: {
-    dir: "assets/video/",
-    prefix: "video",     // video1.mp4, video2.mp4, ...
-    ext: ".mp4",
-    posterExt: ".jpg",   // optional poster image per video (video1.jpg, ...)
-    count: 5             // how many videos are required before it is shown
+    folder: "assets/video/",
+    names: ["video1.mp4", "video2.mp4", "video3.mp4", "video4.mp4", "video5.mp4"],
+    minVideos: 5
   },
 
   // For YOUR testing only: open  index.html?preview=<key>  to open the curtain

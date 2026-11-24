@@ -20,7 +20,7 @@
   }
   function unlockTimestamp(i) { var c = chapterSchedule[i]; return targetTime(c.hour, c.minute); }
   function curtainTimestamp() { return targetTime(0, 0); }   // opens: 12:00 AM on the target date
-  //function closingTimestamp() { return targetTime(23, 59); } // closes: 11:59 PM on the target date
+  function closingTimestamp() { return targetTime(23, 59); } // closes: 11:59 PM on the target date
 
   var PREVIEW = false;
   try {
@@ -33,7 +33,9 @@
     PREVIEW = sessionStorage.getItem("story-preview") === "1";
   } catch (e) {}
 
-  function isUnlocked(i) { return PREVIEW || Date.now() >= unlockTimestamp(i); }
+  // OPEN_ALL = true bypasses every time rule: curtain can always be opened, every chapter is unlocked
+  var OPEN_ALL = PREVIEW || !!CFG.unlockAll;
+  function isUnlocked(i) { return OPEN_ALL || Date.now() >= unlockTimestamp(i); }
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function label12(i) {
     var c = chapterSchedule[i], h = c.hour, ap = h >= 12 ? "PM" : "AM";
@@ -82,7 +84,7 @@
   var OPENED_KEY = "story-curtain-opened";
   var curtainEl = null, readyBtn = null, curtainAudio = null, curtainState = "closed"; // closed | opening | open
 
-  function curtainActive(now) { return PREVIEW || (now >= curtainTimestamp()); } //&& now < closingTimestamp()); }
+  function curtainActive(now) { return OPEN_ALL || (now >= curtainTimestamp() && now < closingTimestamp()); }
 
   function initCurtain() {
     curtainEl = document.getElementById("curtain");
@@ -108,7 +110,7 @@
     if (readyBtn) readyBtn.addEventListener("click", startOpening);
 
     // Curtain music: tap anywhere to start; loops until the curtain has fully opened
-    if (curtainState === "closed" && !(!PREVIEW && Date.now() >= closingTimestamp())) startCurtainMusic();
+    if (curtainState === "closed" && !(!OPEN_ALL && Date.now() >= closingTimestamp())) startCurtainMusic();
   }
 
   var cmGestureEvents = ["touchend", "pointerup", "click", "keydown"], cmArmed = false, cmHint = null, cmWasPlaying = false, cmDone = false;
@@ -180,7 +182,7 @@
   function updateCurtain(now) {
     if (!curtainEl || curtainState === "opening") return;
     var active = curtainActive(now);
-    var ended = !PREVIEW && now >= closingTimestamp();
+    var ended = !OPEN_ALL && now >= closingTimestamp();
 
     if (!active && curtainState === "open") {            // day is over → close the curtain again
       curtainEl.classList.remove("gone", "open", "opening");
@@ -206,79 +208,69 @@
   }
 
   /* ============================================================
-     SPECIAL ONE  (navbar button → video pop-up)
-     Shown ONLY when every video (video1.mp4 … videoN.mp4, N = config.surprise.count)
-     exists in assets/video/. Otherwise the button stays hidden.
+     SPECIAL ONE (navbar button → pop-up with videos 1-5)
+     The button stays hidden unless enough of the video files exist.
      ============================================================ */
+  function probeVideo(url) {                       // fallback check (also works when opened from a folder, not a server)
+    return new Promise(function (resolve) {
+      var v = document.createElement("video"), done = false;
+      function fin(ok) { if (done) return; done = true; v.removeAttribute("src"); try { v.load(); } catch (e) {} resolve(ok); }
+      v.preload = "metadata"; v.onloadedmetadata = function () { fin(true); }; v.onerror = function () { fin(false); };
+      setTimeout(function () { fin(false); }, 10000);
+      v.src = url;
+    });
+  }
+  function videoExists(url) {
+    if (!window.fetch) return probeVideo(url);
+    return fetch(url, { method: "HEAD" }).then(function (r) {
+      if (r.status === 405 || r.status === 501) return probeVideo(url);          // server doesn't allow HEAD
+      var ct = r.headers.get("content-type") || "";
+      return r.ok && (ct === "" || /video|octet-stream|mpeg/i.test(ct));          // a "soft 404" page is text/html → rejected
+    }).catch(function () { return probeVideo(url); });
+  }
+
   function initSurprise() {
     var modal = document.getElementById("surprise-modal");
     var openBtn = document.getElementById("surprise-btn");
     var box = document.getElementById("surprise-videos");
-    if (!modal || !openBtn || !box) return;
-    var cfg = (window.STORY_CONFIG && window.STORY_CONFIG.surprise) || {};
-    var dir = cfg.dir || "assets/video/", prefix = cfg.prefix || "video", ext = cfg.ext || ".mp4";
-    var posterExt = cfg.posterExt || ".jpg", count = cfg.count || 5;
+    var SC = CFG.surprise;
+    if (!modal || !openBtn || !box || !SC) return;
     var closeBtn = modal.querySelector(".close-btn");
-    var vids = [];
 
-    /* does this file exist?  (HEAD request on a server; metadata probe when opened from disk) */
-    function exists(src) {
-      if (/^https?:/i.test(location.protocol) && window.fetch) {
-        return fetch(src, { method: "HEAD", cache: "no-cache" }).then(function (r) {
-          var type = (r.headers.get("content-type") || "").toLowerCase();
-          return r.ok && type.indexOf("text/html") === -1;
-        }).catch(function () { return false; });
-      }
-      return new Promise(function (resolve) {
-        var v = document.createElement("video"), done = false;
-        function fin(ok) { if (done) return; done = true; v.removeAttribute("src"); v.load(); resolve(ok); }
-        v.preload = "metadata"; v.muted = true;
-        v.onloadedmetadata = function () { fin(true); };
-        v.onerror = function () { fin(false); };
-        setTimeout(function () { fin(false); }, 15000);
-        v.src = src;
-      });
-    }
-
-    function build() {
-      box.textContent = "";
-      for (var i = 1; i <= count; i++) {
-        var v = document.createElement("video");
-        v.controls = true; v.setAttribute("playsinline", ""); v.preload = "metadata";
-        v.poster = dir + prefix + i + posterExt;
-        v.src = dir + prefix + i + ext;
-        v.setAttribute("aria-label", "Special video " + i + " of " + count);
-        v.addEventListener("play", (function (me) { return function () {   // only one video plays at a time
-          vids.forEach(function (o) { if (o !== me) o.pause(); });
-        }; })(v));
-        vids.push(v); box.appendChild(v);
-      }
-    }
-
+    function vids() { return [].slice.call(box.querySelectorAll("video")); }
     function openModal() {
       modal.classList.add("show");
       document.body.classList.add("noscroll");
-      if (window.Story && window.Story.bgm) window.Story.bgm.suspend();   // pause chapter music while the videos are open
+      if (window.Story && window.Story.bgm) window.Story.bgm.suspend();   // pause chapter music while videos are open
       closeBtn.focus();
     }
     function closeModal() {
-      vids.forEach(function (v) { v.pause(); });
+      vids().forEach(function (v) { v.pause(); });
       modal.classList.remove("show");
       document.body.classList.remove("noscroll");
       if (window.Story && window.Story.bgm) window.Story.bgm.resume();
       openBtn.focus();
     }
     window.openModal = openModal; window.closeModal = closeModal;
+
     openBtn.addEventListener("click", openModal);
     closeBtn.addEventListener("click", closeModal);
     modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });   // click outside the content
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && modal.classList.contains("show")) closeModal(); });
 
-    var checks = [];
-    for (var i = 1; i <= count; i++) checks.push(exists(dir + prefix + i + ext));
-    Promise.all(checks).then(function (found) {
-      if (found.every(Boolean)) { build(); openBtn.hidden = false; }   // all present → show
-      /* otherwise: the button stays hidden */
+    // Which of video1…video5 are really there?
+    var urls = SC.names.map(function (n) { return SC.folder + n; });
+    Promise.all(urls.map(videoExists)).then(function (flags) {
+      var found = urls.filter(function (u, i) { return flags[i]; });
+      if (found.length < (SC.minVideos || 1) || !found.length) return;        // not enough videos → feature stays hidden
+      found.forEach(function (u) {
+        var v = document.createElement("video");
+        v.controls = true; v.preload = "metadata"; v.setAttribute("playsinline", "");
+        v.src = u + "#t=0.1";                                                  // metadata only; #t shows a first frame (incl. iPhones)
+        v.addEventListener("play", function () { vids().forEach(function (o) { if (o !== v) o.pause(); }); });   // one at a time
+        box.appendChild(v);
+      });
+      openBtn.hidden = false;
     });
   }
 
