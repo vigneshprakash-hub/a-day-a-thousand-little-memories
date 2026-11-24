@@ -266,7 +266,7 @@
       found.forEach(function (u) {
         var v = document.createElement("video");
         v.controls = true; v.preload = "metadata"; v.setAttribute("playsinline", "");
-        v.src = u + "#t=0.1";                                                  // metadata only; #t shows a first frame (incl. iPhones)
+        v.src = u ;                                                  // metadata only; #t shows a first frame (incl. iPhones)
         v.addEventListener("play", function () { vids().forEach(function (o) { if (o !== v) o.pause(); }); });   // one at a time
         box.appendChild(v);
       });
