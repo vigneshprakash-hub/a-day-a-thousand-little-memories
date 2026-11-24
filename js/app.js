@@ -265,8 +265,15 @@
       if (found.length < (SC.minVideos || 1) || !found.length) return;        // not enough videos → feature stays hidden
       found.forEach(function (u) {
         var v = document.createElement("video");
-        v.controls = true; v.preload = "metadata"; v.setAttribute("playsinline", "");
-        v.src = u ;                                                  // metadata only; #t shows a first frame (incl. iPhones)
+        v.controls = true; v.preload = "none"; v.setAttribute("playsinline", "");   // "none" keeps the preview image on screen
+        var posterUrl = u.replace(/\.[^./]+$/, ".jpg");                              // preview image: same name as the video, .jpg (video3.mp4 → video3.jpg)
+        v.poster = posterUrl;
+        v.src = u;
+        (function (vid, pu, vu) {                                                  // no .jpg found? fall back to the video's first frame
+          var probe = new Image();
+          probe.onerror = function () { vid.removeAttribute("poster"); vid.preload = "metadata"; vid.src = vu + "#t=0.1"; };
+          probe.src = pu;
+        })(v, posterUrl, u);
         v.addEventListener("play", function () { vids().forEach(function (o) { if (o !== v) o.pause(); }); });   // one at a time
         box.appendChild(v);
       });
